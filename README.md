@@ -56,6 +56,51 @@ uvicorn app:app --reload
   - `POST /chat` should accept the full stateless conversation history and return a schema-compliant response.
 - Optional: set `EMBEDDINGS_ENABLED=1` to enable sentence-transformers embeddings. If not set, the service uses a deterministic offline fallback.
 
+## Deploy on Render (Step-by-step)
+
+1) Push this repository to GitHub
+
+2) Create a new Render Web Service
+ 
+    - In Render: `New` -> `Web Service`
+    - Connect your GitHub repo
+
+3) Choose a deployment method
+
+    Option A (recommended): Docker
+    - Render will detect the `Dockerfile` automatically.
+
+    Option B: Native Python
+    - **Build command**: `pip install -r requirements.txt`
+    - **Start command**: `uvicorn app:app --host 0.0.0.0 --port $PORT`
+
+4) Configure environment variables (Render -> Environment)
+
+    - `GROQ_API_KEY`: your Groq API key
+    - `EMBEDDINGS_ENABLED`: `1` (recommended) or `0` (offline / no model downloads)
+    - (Optional) `PORT`: Render provides this automatically
+
+5) Deploy
+
+6) Verify
+
+    After the deploy finishes, Render will give you a public base URL like:
+    `https://YOUR-SERVICE.onrender.com`
+
+    Test these URLs:
+    - `GET https://YOUR-SERVICE.onrender.com/health`
+    - Swagger UI: `https://YOUR-SERVICE.onrender.com/docs`
+    - `POST https://YOUR-SERVICE.onrender.com/chat`
+
+    Example `POST /chat` payload:
+    ```json
+    {
+      "messages": [
+        {"role": "user", "content": "Hiring a mid-level Java developer. Need coding and problem solving."}
+      ]
+    }
+    ```
+
 ## API Contract
 
 ### GET `/health`
