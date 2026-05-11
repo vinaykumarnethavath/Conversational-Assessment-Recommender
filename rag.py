@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import re
 from dataclasses import dataclass
 from pathlib import Path
@@ -28,6 +29,44 @@ class AssessmentRAG:
         self.catalog: List[Dict[str, Any]] = self._load_catalog()
         self.embedder = Embedder()
         self.catalog_embeddings = self._build_embeddings(self.catalog)
+
+    def _llm_enabled(self) -> bool:
+        flag = os.getenv("LLM_ENABLED", "0").strip().lower() in {"1", "true", "yes"}
+        return flag and bool(os.getenv("GROQ_API_KEY", "").strip())
+
+    def _groq_client(self):
+        try:
+            from groq import Groq
+        except Exception:
+            return None
+        api_key = os.getenv("GROQ_API_KEY", "").strip()
+        if not api_key:
+            return None
+        return Groq(api_key=api_key)
+
+    def _groq_complete(self, prompt: str) -> Optional[str]:
+        if not self._llm_enabled():
+            return None
+        client = self._groq_client()
+        if client is None:
+            return None
+        model = os.getenv("GROQ_MODEL", "llama-3.1-8b-instant").strip() or "llama-3.1-8b-instant"
+        try:
+            resp = client.chat.completions.create(
+                model=model,
+                messages=[
+                    {"role": "system", "content": "You are an SHL assessment assistant. Be concise, accurate, and never invent assessment names or URLs."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.2,
+                max_tokens=250,
+            )
+            content = resp.choices[0].message.content if resp and resp.choices else None
+            if content:
+                return content.strip()
+        except Exception:
+            return None
+        return None
 
     def _load_catalog(self) -> List[Dict[str, Any]]:
         candidates = [
@@ -155,11 +194,83 @@ class AssessmentRAG:
         return missing
 
     def next_question(self, missing: List[str]) -> str:
+        if self._llm_enabled():
+            prompt = (
+                "Ask exactly one short clarification question to collect missing hiring requirements. "
+                f"Missing fields: {', '.join(missing)}. "
+                "Do not mention internal field names."
+            )
+            completion = self._groq_complete(prompt)
+            if completion:
+                return completion
         if "role" in missing:
             return "What role are you hiring for (for example Java developer, analyst, or sales manager)?"
         if "seniority" in missing:
             return "What experience level are you hiring for (entry, mid, or senior)?"
         return "Do you want technical coding tests, cognitive aptitude tests, personality tests, leadership tests, or a combination?"
+
+    def recommendation_reply(self, state: RequirementState, items: List[Dict[str, Any]]) -> str:
+        if not items:
+            return "Here are the most relevant SHL assessments based on your requirements."
+        if not self._llm_enabled():
+            return "Here are the most relevant SHL assessments based on your requirements."
+
+        item_lines = []
+        for item in items[:10]:
+            name = (item.get("name") or "").strip()
+            url = (item.get("url") or "").strip()
+            test_type = (item.get("test_type") or "").strip()
+            if name and url:
+                item_lines.append(f"- {name} ({test_type}) {url}")
+
+        prompt = (
+            "Write a concise recruiter-facing response explaining why the following SHL assessments fit the user's request. "
+            "You must only reference assessments from the provided list. Do not invent anything. "
+            "End with a short question offering refinement (e.g., add/remove personality/cognitive/coding).\n\n"
+            f"Role: {state.role or 'unknown'}\n"
+            f"Seniority: {state.seniority or 'unknown'}\n"
+            f"Must-have skills: {', '.join(state.must_have_skills) or 'none'}\n"
+            f"Requested focus: "
+            f"coding={state.wants_coding}, cognitive={state.wants_cognitive}, personality={state.wants_personality}, leadership={state.wants_leadership}\n\n"
+            "Assessments (name, type, url):\n" + "\n".join(item_lines)
+        )
+        completion = self._groq_complete(prompt)
+        return completion or "Here are the most relevant SHL assessments based on your requirements."
+
+    def compare_reply(self, left: Dict[str, Any], right: Dict[str, Any]) -> str:
+        if not self._llm_enabled():
+            return (
+                f"{left['name']} is a {left['category']} assessment ({left.get('duration_minutes') or 'NA'} mins) "
+                f"focused on {', '.join(left['skills'][:3])}. "
+                f"{right['name']} is a {right['category']} assessment ({right.get('duration_minutes') or 'NA'} mins) "
+                f"focused on {', '.join(right['skills'][:3])}. "
+                "Choose the first when role fit relies on its skill profile, and the second when the alternate profile is more relevant."
+            )
+
+        def fmt(item: Dict[str, Any]) -> str:
+            return (
+                f"Name: {item.get('name','')}\n"
+                f"Category: {item.get('category','')}\n"
+                f"Test type: {item.get('test_type','')}\n"
+                f"Duration minutes: {item.get('duration_minutes') or 'NA'}\n"
+                f"Skills: {', '.join(item.get('skills', [])[:10])}\n"
+                f"URL: {item.get('url','')}\n"
+            )
+
+        prompt = (
+            "Compare these two SHL assessments using only the provided catalog fields. "
+            "Explain differences in category/focus and when to choose each. Be concise.\n\n"
+            "Assessment A:\n" + fmt(left) + "\n"
+            "Assessment B:\n" + fmt(right)
+        )
+        completion = self._groq_complete(prompt)
+        return completion or (
+            f"{left['name']} is a {left['category']} assessment ({left.get('duration_minutes') or 'NA'} mins) "
+            f"focused on {', '.join(left['skills'][:3])}. "
+            f"{right['name']} is a {right['category']} assessment ({right.get('duration_minutes') or 'NA'} mins) "
+            f"focused on {', '.join(right['skills'][:3])}. "
+            "Choose the first when role fit relies on its skill profile, and the second when the alternate profile is more relevant."
+        )
 
     def detect_compare_request(self, text: str) -> Optional[Tuple[str, str]]:
         lowered = text.lower().strip()
@@ -179,13 +290,7 @@ class AssessmentRAG:
         right = self._fuzzy_find(right_name)
         if not left or not right:
             return None
-        return (
-            f"{left['name']} is a {left['category']} assessment ({left.get('duration_minutes') or 'NA'} mins) "
-            f"focused on {', '.join(left['skills'][:3])}. "
-            f"{right['name']} is a {right['category']} assessment ({right.get('duration_minutes') or 'NA'} mins) "
-            f"focused on {', '.join(right['skills'][:3])}. "
-            "Choose the first when role fit relies on its skill profile, and the second when the alternate profile is more relevant."
-        )
+        return self.compare_reply(left, right)
 
     def _fuzzy_find(self, text: str) -> Optional[Dict[str, Any]]:
         query = text.lower()

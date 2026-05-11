@@ -65,6 +65,8 @@ uvicorn app:app --reload
     - In Render: `New` -> `Web Service`
     - Connect your GitHub repo
 
+    Note: Render does not use your local `.env` file. Add secrets (like `GROQ_API_KEY`) in Render's Environment settings.
+
 3) Choose a deployment method
 
     Option A (recommended): Docker
@@ -77,20 +79,22 @@ uvicorn app:app --reload
 4) Configure environment variables (Render -> Environment)
 
     - `GROQ_API_KEY`: your Groq API key
-    - `EMBEDDINGS_ENABLED`: `1` (recommended) or `0` (offline / no model downloads)
+    - `EMBEDDINGS_ENABLED`: `0` (recommended for Render free tier / 512Mi to avoid out-of-memory during model load) or `1` (enables sentence-transformers; requires more memory)
     - (Optional) `PORT`: Render provides this automatically
 
 5) Deploy
 
+    If your deploy fails with out-of-memory on the free tier, keep `EMBEDDINGS_ENABLED=0` or upgrade the Render instance size.
+
 6) Verify
 
     After the deploy finishes, Render will give you a public base URL like:
-    `https://YOUR-SERVICE.onrender.com`
+    `https://conversational-assessment-recommender-1.onrender.com
 
     Test these URLs:
-    - `GET https://YOUR-SERVICE.onrender.com/health`
-    - Swagger UI: `https://YOUR-SERVICE.onrender.com/docs`
-    - `POST https://YOUR-SERVICE.onrender.com/chat`
+    - `GET https://conversational-assessment-recommender-1.onrender.com/health`
+    - Swagger UI: `https://conversational-assessment-recommender-1.onrender.com/docs`
+    - `POST https://conversational-assessment-recommender-1.onrender.com/chat`
 
     Example `POST /chat` payload:
     ```json

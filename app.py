@@ -120,8 +120,9 @@ def chat(payload: ChatRequest) -> ChatResponse:
                 end_of_conversation=False,
             )
 
+        reply_text = rag.recommendation_reply(state, items)
         return ChatResponse(
-            reply="Here are the most relevant SHL assessments based on your requirements.",
+            reply=reply_text,
             recommendations=recommendations,
             end_of_conversation=True,
         )
