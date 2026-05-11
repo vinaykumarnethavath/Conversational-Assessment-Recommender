@@ -56,6 +56,18 @@ uvicorn app:app --reload
   - `POST /chat` should accept the full stateless conversation history and return a schema-compliant response.
 - Optional: set `EMBEDDINGS_ENABLED=1` to enable sentence-transformers embeddings. If not set, the service uses a deterministic offline fallback.
 
+- Optional: enable Groq-powered responses by setting:
+  - `LLM_ENABLED=1`
+  - `GROQ_API_KEY=...`
+  - (Optional) `GROQ_MODEL=llama-3.1-8b-instant`
+
+  When enabled, Groq is used to:
+  - Ask clearer clarification questions
+  - Write recruiter-facing explanations for the retrieved shortlist
+  - Compare two assessments using only catalog fields
+
+  Recommendations are still grounded in the scraped SHL catalog; the LLM only generates the `reply` text.
+
 ## Deploy on Render (Step-by-step)
 
 1) Push this repository to GitHub
@@ -79,6 +91,8 @@ uvicorn app:app --reload
 4) Configure environment variables (Render -> Environment)
 
     - `GROQ_API_KEY`: your Groq API key
+    - `LLM_ENABLED`: `1` to enable Groq (recommended) or `0` to run fully offline
+    - (Optional) `GROQ_MODEL`: `llama-3.1-8b-instant`
     - `EMBEDDINGS_ENABLED`: `0` (recommended for Render free tier / 512Mi to avoid out-of-memory during model load) or `1` (enables sentence-transformers; requires more memory)
     - (Optional) `PORT`: Render provides this automatically
 
@@ -89,7 +103,7 @@ uvicorn app:app --reload
 6) Verify
 
     After the deploy finishes, Render will give you a public base URL like:
-    `https://conversational-assessment-recommender-1.onrender.com
+    `https://conversational-assessment-recommender-1.onrender.com`
 
     Test these URLs:
     - `GET https://conversational-assessment-recommender-1.onrender.com/health`
