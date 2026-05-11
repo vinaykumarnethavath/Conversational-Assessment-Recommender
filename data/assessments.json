@@ -1,0 +1,110 @@
+[
+  {
+    "name": "Java 8 (New)",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/java-8-new/",
+    "category": "Technical",
+    "test_type": "K",
+    "skills": ["Java", "OOP", "Collections", "Exception Handling", "Backend"],
+    "duration_minutes": 30,
+    "description": "Evaluates Java programming proficiency for software development roles."
+  },
+  {
+    "name": "Core Java (Entry Level)",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/core-java-entry-level/",
+    "category": "Technical",
+    "test_type": "K",
+    "skills": ["Java", "Syntax", "Control Flow", "Debugging"],
+    "duration_minutes": 25,
+    "description": "Assesses foundational Java knowledge for junior developer hiring."
+  },
+  {
+    "name": "SQL Fundamentals",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/sql-fundamentals/",
+    "category": "Technical",
+    "test_type": "K",
+    "skills": ["SQL", "Queries", "Joins", "Database"],
+    "duration_minutes": 20,
+    "description": "Measures practical SQL skills for data-heavy engineering roles."
+  },
+  {
+    "name": "JavaScript Programming",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/javascript-programming/",
+    "category": "Technical",
+    "test_type": "K",
+    "skills": ["JavaScript", "ES6", "Frontend", "Debugging"],
+    "duration_minutes": 30,
+    "description": "Assesses JavaScript coding competency for web development roles."
+  },
+  {
+    "name": "Python (New)",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/python-new/",
+    "category": "Technical",
+    "test_type": "K",
+    "skills": ["Python", "Data Structures", "Scripting", "Problem Solving"],
+    "duration_minutes": 30,
+    "description": "Evaluates Python programming skills for backend and data roles."
+  },
+  {
+    "name": "General Ability Test",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/general-ability-test/",
+    "category": "Cognitive",
+    "test_type": "A",
+    "skills": ["Problem Solving", "Numerical Reasoning", "Verbal Reasoning"],
+    "duration_minutes": 36,
+    "description": "Measures overall cognitive ability and learning potential."
+  },
+  {
+    "name": "Verify Interactive Numerical Reasoning",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/verify-interactive-numerical-reasoning/",
+    "category": "Cognitive",
+    "test_type": "A",
+    "skills": ["Numerical Reasoning", "Data Interpretation"],
+    "duration_minutes": 18,
+    "description": "Assesses numerical analysis and interpretation under time pressure."
+  },
+  {
+    "name": "Occupational Personality Questionnaire (OPQ)",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/occupational-personality-questionnaire-opq/",
+    "category": "Personality",
+    "test_type": "P",
+    "skills": ["Behavioral Preferences", "Team Fit", "Leadership Style"],
+    "duration_minutes": 25,
+    "description": "Profiles work-related behavioral style and organizational fit."
+  },
+  {
+    "name": "Motivation Questionnaire",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/motivation-questionnaire/",
+    "category": "Personality",
+    "test_type": "P",
+    "skills": ["Motivation", "Values", "Culture Fit"],
+    "duration_minutes": 20,
+    "description": "Evaluates workplace drivers and motivational preferences."
+  },
+  {
+    "name": "Situational Judgement Test - Professional",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/situational-judgement-test-professional/",
+    "category": "Behavioral",
+    "test_type": "S",
+    "skills": ["Decision Making", "Stakeholder Management", "Judgment"],
+    "duration_minutes": 30,
+    "description": "Measures applied workplace judgment in realistic business scenarios."
+  },
+  {
+    "name": "Coding Simulation - Backend Engineer",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/coding-simulation-backend-engineer/",
+    "category": "Simulation",
+    "test_type": "K",
+    "skills": ["APIs", "Backend", "Code Quality", "Debugging"],
+    "duration_minutes": 60,
+    "description": "Hands-on coding simulation to evaluate practical backend engineering ability."
+  },
+  {
+    "name": "Leadership Assessment",
+    "url": "https://www.shl.com/solutions/products/product-catalog/view/leadership-assessment/",
+    "category": "Leadership",
+    "test_type": "L",
+    "skills": ["Leadership", "People Management", "Strategic Thinking"],
+    "duration_minutes": 40,
+    "description": "Assesses leadership capability for managerial and team lead positions."
+  }
+]
